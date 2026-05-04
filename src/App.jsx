@@ -8,18 +8,38 @@ export default function App() {
     const stageRef = useRef(null);
     const [pos, setPos] = useState({ x: 300, y: 0 });
     const [showDiv, setShowDiv] = useState(false);
-    const soundRef = useRef(null);
+    const openSoundRef = useRef(null);
+    const closeSoundRef = useRef(null);
+    const [popItKey, setPopItKey] = useState(0);
+    const [closing, setClosing] = useState(false);
 
     useEffect(() => {
-        soundRef.current = new Audio("/sounds/ppt_open.wav");
-        soundRef.current.volume = 0.2;
+        openSoundRef.current = new Audio("/sounds/ppt_open.wav");
+        openSoundRef.current.volume = 0.2;
+
+        closeSoundRef.current = new Audio("/sounds/ppt_close.wav");
+        closeSoundRef.current.volume = 0.2;
         
         const down = (e) => {
             keysRef.current[e.key] = true;
             if (e.key === "e") {
-                setShowDiv(true);
-                soundRef.current.currentTime = 0;
-                soundRef.current.play();
+                setShowDiv(prev => {
+                    if (prev) {
+                        setClosing(true);
+                        closeSoundRef.current.currentTime = 0;
+                        closeSoundRef.current.play();
+                        setTimeout(() => {
+                            setShowDiv(false);
+                            setClosing(false);
+                        }, 300);
+                        return true; // keep mounted during animation
+                    }
+                    setClosing(false);
+                    setPopItKey(k => k + 1);
+                    openSoundRef.current.currentTime = 0;
+                    openSoundRef.current.play();
+                    return true;
+                });
             }
         };
         const up = (e) => {
@@ -101,15 +121,22 @@ export default function App() {
             }} />
 
             {/* Player Menu */}
-            {showDiv && (<div style={{
-                position: "absolute",
-                left: pos.x + 40,
-                bottom: ballBottom + RADIUS * 2 + 8,
-                width: 160,
-                height: 180,
-                background: "rgba(0, 0, 0, 0.4)",
-                borderRadius: 6
-            }} />)}
+            {showDiv && (<motion.div
+                key={popItKey}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={closing ? { scale: 0, opacity: 0 } : { scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 18 }}
+                style={{
+                    position: "absolute",
+                    left: pos.x + 40,
+                    bottom: ballBottom + RADIUS * 2 + 8,
+                    width: 160,
+                    height: 180,
+                    background: `linear-gradient(to bottom, rgba(255,255,255,0.5), rgba(255,255,255,0)), #f521b9`,
+                    borderRadius: 6,
+                    transformOrigin: "bottom left"
+                }}
+            />)}
             
             {/* Stand-in for Sackboy */}
             <motion.div
