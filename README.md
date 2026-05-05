@@ -1,2 +1,2 @@
 # Sackboy UI
-Experimenting with motion.dev to create interactive UI's.
+Experimenting with motion.dev to create interactive UIs.
