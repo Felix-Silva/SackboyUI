@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "motion/react";
+import { Shirt, Sticker, Cog, CircleHelp, MessageCircleMore, Gamepad2, BookUser, Palette, AlarmClock} from "lucide-react";
 
 const BUTTONS = [
-    "1", "2", "3",
-    "4", "5", "6",
-    "7", "8", "9",
+    Shirt, Sticker, Cog,
+    CircleHelp, MessageCircleMore, Gamepad2,
+    BookUser, Palette, AlarmClock,
 ];
 
 export default function App() {
@@ -89,7 +90,7 @@ export default function App() {
                             transformOrigin: "bottom left",
                         }}
                     >
-                        {BUTTONS.map((label, i) => (
+                        {BUTTONS.map((Icon, i) => (
                             <button key={i}
                                 onClick={e => {
                                     e.stopPropagation()
@@ -97,16 +98,12 @@ export default function App() {
                                     selectSoundRef.current.play();
                                 }}
                                 style={{
-                                    padding: "14px 0",
-                                    fontSize: 13,
-                                    fontWeight: 700,
-                                    borderRadius: 8,
-                                    border: "2px solid rgba(255,255,255,0.4)",
-                                    background: "rgba(255,255,255,0.25)",
-                                    color: "white",
+                                    padding: "8px 0",
                                     cursor: "pointer",
+                                    background: "none",
+                                    border: "none"
                                 }}>
-                                {label}
+                                <Icon size={28} color="white" />
                             </button>
                         ))}
                     </motion.div>
