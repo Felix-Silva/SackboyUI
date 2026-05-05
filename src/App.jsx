@@ -1,156 +1,117 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "motion/react";
 
+const BUTTONS = [
+    "1", "2", "3",
+    "4", "5", "6",
+    "7", "8", "9",
+];
+
 export default function App() {
-    const posRef = useRef({ x: 300, y: 0, vy: 0 });
-    const keysRef = useRef({});
-    const animRef = useRef(null);
-    const stageRef = useRef(null);
-    const [pos, setPos] = useState({ x: 300, y: 0 });
     const [showDiv, setShowDiv] = useState(false);
-    const openSoundRef = useRef(null);
-    const closeSoundRef = useRef(null);
     const [popItKey, setPopItKey] = useState(0);
     const [closing, setClosing] = useState(false);
+    const openSoundRef = useRef(null);
+    const closeSoundRef = useRef(null);
+    const selectSoundRef = useRef(null);
+    const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
 
     useEffect(() => {
         openSoundRef.current = new Audio("/sounds/ppt_open.wav");
         openSoundRef.current.volume = 0.2;
-
         closeSoundRef.current = new Audio("/sounds/ppt_close.wav");
         closeSoundRef.current.volume = 0.2;
-        
-        const down = (e) => {
-            keysRef.current[e.key] = true;
-            if (e.key === "e") {
-                setShowDiv(prev => {
-                    if (prev) {
-                        setClosing(true);
-                        closeSoundRef.current.currentTime = 0;
-                        closeSoundRef.current.play();
-                        setTimeout(() => {
-                            setShowDiv(false);
-                            setClosing(false);
-                        }, 300);
-                        return true; // keep mounted during animation
-                    }
-                    setClosing(false);
-                    setPopItKey(k => k + 1);
-                    openSoundRef.current.currentTime = 0;
-                    openSoundRef.current.play();
-                    return true;
-                });
-            }
-        };
-        const up = (e) => {
-            keysRef.current[e.key] = false;
-        };
-        window.addEventListener("keydown", down);
-        window.addEventListener("keyup", up);
-        return () => {
-            window.removeEventListener("keydown", down);
-            window.removeEventListener("keyup", up);
-        };
+        selectSoundRef.current = new Audio("/sounds/ppt_select.wav");
+        selectSoundRef.current.volume = 0.2;
     }, []);
 
-    useEffect(() => {
-        const GRAVITY = 0.4;
-        const JUMP = -8;
-        const SPEED = 2.5;
-        const GROUND = 0;
-        const RADIUS = 24;
-
-        const loop = () => {
-            const k = keysRef.current;
-            const p = posRef.current;
-            const stageW = stageRef.current?.offsetWidth ?? 700;
-
-            const moving = k["ArrowLeft"] || k["a"] || k["ArrowRight"] || k["d"] || k["ArrowUp"] || k[" "] || k["w"];
-            if (moving) {
+    const handleToggle = () => {
+        if (showDiv) {
+            setClosing(true);
+            closeSoundRef.current.currentTime = 0;
+            closeSoundRef.current.play();
+            setTimeout(() => {
                 setShowDiv(false);
-            }
-            
-            if (k["ArrowLeft"] || k["a"]) {
-                p.x = Math.max(RADIUS, p.x - SPEED);  
-            } 
-            if (k["ArrowRight"] || k["d"]) {
-                p.x = Math.min(stageW - RADIUS, p.x + SPEED);
-            }
+                setClosing(false);
+            }, 300);
+        } else {
+            setClosing(false);
+            setPopItKey(k => k + 1);
+            openSoundRef.current.currentTime = 0;
+            openSoundRef.current.play();
+            setShowDiv(true);
+        }
+    };
 
-            if ((k["ArrowUp"] || k[" "] || k["w"]) && p.y >= GROUND) {
-                p.vy = JUMP;
-            }
-
-            p.vy += GRAVITY;
-            p.y = Math.min(GROUND, p.y + p.vy);
-            if (p.y >= GROUND) { p.y = GROUND; p.vy = 0; }
-            
-            if (k["e"]) {
-                    
-            }
-            
-            setPos({ x: p.x, y: p.y });
-            animRef.current = requestAnimationFrame(loop);
-        };
-
-        animRef.current = requestAnimationFrame(loop);
-        return () => cancelAnimationFrame(animRef.current);
-    }, []);
+    const handleContextMenu = (e) => {
+        e.preventDefault();
+        setMenuPos({ x: e.clientX, y: e.clientY });
+        handleToggle();
+    };
     
-    const GROUND_H = 60;
-    const RADIUS = 24;
-    const ballBottom = GROUND_H + (-pos.y);
-
+    const handleClick = () => {
+        if (showDiv) handleToggle();
+    }
+    
     return (
         <div
-            ref={stageRef}
+            onContextMenu={handleContextMenu}
+            onClick={handleClick}
             style={{
-                position: "relative",
                 width: "100vw",
                 height: "100vh",
                 background: "#e8d9b0",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
             }}
         >
-            {/* Ground */}
-            <div style={{
-                position: "absolute",
-                bottom: 0, left: 0, right: 0,
-                height: `${GROUND_H}px`,
-                background: "#c4a86a",
-                borderTop: "2px solid #a08848",
-            }} />
-
-            {/* Player Menu */}
-            {showDiv && (<motion.div
-                key={popItKey}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={closing ? { scale: 0, opacity: 0 } : { scale: 1, opacity: 1 }}
-                transition={{ type: "spring", stiffness: 300, damping: 18 }}
-                style={{
-                    position: "absolute",
-                    left: pos.x + 40,
-                    bottom: ballBottom + RADIUS * 2 + 8,
-                    width: 160,
-                    height: 180,
-                    background: `linear-gradient(to bottom, rgba(255,255,255,0.5), rgba(255,255,255,0)), #f521b9`,
-                    borderRadius: 6,
-                    transformOrigin: "bottom left"
-                }}
-            />)}
-            
-            {/* Stand-in for Sackboy */}
-            <motion.div
-                style={{
-                    position: "absolute",
-                    left: pos.x - RADIUS,
-                    bottom: ballBottom,
-                    width: RADIUS * 2,
-                    height: RADIUS * 2,
-                    borderRadius: "50%",
-                    background: "radial-gradient(circle at 35% 35%, #A0522D, #7B3F00)",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-                }}
-            />
+            <div style={{ position: "relative" }}>
+                {showDiv && (
+                    <motion.div
+                        key={popItKey}
+                        onClick={e => e.stopPropagation()}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={closing ? { scale: 0, opacity: 0 } : { scale: 1, opacity: 1 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 18 }}
+                        style={{
+                            position: "fixed",
+                            left: menuPos.x,
+                            top: menuPos.y - 180 - 12,
+                            transform: "translateX(-50%)",
+                            background: `linear-gradient(to bottom, rgba(255,255,255,0.5), rgba(255,255,255,0)), #f521b9`,
+                            borderRadius: 12,
+                            padding: 16,
+                            display: "grid",
+                            gridTemplateColumns: "repeat(3, 1fr)",
+                            gap: 10,
+                            width: 280,
+                            transformOrigin: "bottom left",
+                        }}
+                    >
+                        {BUTTONS.map((label, i) => (
+                            <button key={i}
+                                onClick={e => {
+                                    e.stopPropagation()
+                                    selectSoundRef.current.currentTime = 0;
+                                    selectSoundRef.current.play();
+                                }}
+                                style={{
+                                    padding: "14px 0",
+                                    fontSize: 13,
+                                    fontWeight: 700,
+                                    borderRadius: 8,
+                                    border: "2px solid rgba(255,255,255,0.4)",
+                                    background: "rgba(255,255,255,0.25)",
+                                    color: "white",
+                                    cursor: "pointer",
+                                }}>
+                                {label}
+                            </button>
+                        ))}
+                    </motion.div>
+                )}
+            </div>
         </div>
     );
 }
