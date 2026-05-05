@@ -18,11 +18,11 @@ export default function App() {
     const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
 
     useEffect(() => {
-        openSoundRef.current = new Audio("/sounds/ppt_open.wav");
+        openSoundRef.current = new Audio("/SackboyUI/sounds/ppt_open.wav");
+        closeSoundRef.current = new Audio("/SackboyUI/sounds/ppt_close.wav");
+        selectSoundRef.current = new Audio("/SackboyUI/sounds/ppt_select.wav");
         openSoundRef.current.volume = 0.2;
-        closeSoundRef.current = new Audio("/sounds/ppt_close.wav");
         closeSoundRef.current.volume = 0.2;
-        selectSoundRef.current = new Audio("/sounds/ppt_select.wav");
         selectSoundRef.current.volume = 0.2;
     }, []);
 
