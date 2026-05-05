@@ -91,20 +91,23 @@ export default function App() {
                         }}
                     >
                         {BUTTONS.map((Icon, i) => (
-                            <button key={i}
+                            <motion.button 
+                                whileHover={{ scale: 1.2, opacity: 0.9 }}
+                                transition={{ type: "spring", stiffness: 200 }}
+                                key={i}
                                 onClick={e => {
                                     e.stopPropagation()
                                     selectSoundRef.current.currentTime = 0;
                                     selectSoundRef.current.play();
                                 }}
                                 style={{
-                                    padding: "8px 0",
+                                    padding: "22px 0",
                                     cursor: "pointer",
                                     background: "none",
                                     border: "none"
                                 }}>
-                                <Icon size={28} color="white" />
-                            </button>
+                                <Icon size={38} color="white" />
+                            </motion.button>
                         ))}
                     </motion.div>
                 )}
