@@ -12,10 +12,12 @@ export default function App() {
     const [showDiv, setShowDiv] = useState(false);
     const [popItKey, setPopItKey] = useState(0);
     const [closing, setClosing] = useState(false);
+    const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
+    const [popItHeight, setPopItHeight] = useState(0);
     const openSoundRef = useRef(null);
     const closeSoundRef = useRef(null);
     const selectSoundRef = useRef(null);
-    const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
+    const popItRef = useRef(null);
 
     useEffect(() => {
         openSoundRef.current = new Audio("/SackboyUI/sounds/ppt_open.wav");
@@ -25,6 +27,12 @@ export default function App() {
         closeSoundRef.current.volume = 0.2;
         selectSoundRef.current.volume = 0.2;
     }, []);
+
+    useEffect(() => {
+        if (showDiv && popItRef.current) {
+            setPopItHeight(popItRef.current.offsetHeight);
+        }
+    }, [showDiv]);
 
     const handleToggle = () => {
         if (showDiv) {
@@ -49,11 +57,11 @@ export default function App() {
         setMenuPos({ x: e.clientX, y: e.clientY });
         handleToggle();
     };
-    
+
     const handleClick = () => {
         if (showDiv) handleToggle();
-    }
-    
+    };
+
     return (
         <div
             onContextMenu={handleContextMenu}
@@ -70,6 +78,7 @@ export default function App() {
             <div style={{ position: "relative" }}>
                 {showDiv && (
                     <motion.div
+                        ref={popItRef}
                         key={popItKey}
                         onClick={e => e.stopPropagation()}
                         initial={{ scale: 0, opacity: 0 }}
@@ -78,8 +87,7 @@ export default function App() {
                         style={{
                             position: "fixed",
                             left: menuPos.x,
-                            top: menuPos.y - 180 - 12,
-                            transform: "translateX(-50%)",
+                            top: menuPos.y - popItHeight,
                             background: `linear-gradient(to bottom, rgba(255,255,255,0.5), rgba(255,255,255,0)), #f521b9`,
                             borderRadius: 12,
                             padding: 16,
@@ -91,12 +99,12 @@ export default function App() {
                         }}
                     >
                         {BUTTONS.map((Icon, i) => (
-                            <motion.button 
+                            <motion.button
+                                key={i}
                                 whileHover={{ scale: 1.2, opacity: 0.9 }}
                                 transition={{ type: "spring", stiffness: 200 }}
-                                key={i}
                                 onClick={e => {
-                                    e.stopPropagation()
+                                    e.stopPropagation();
                                     selectSoundRef.current.currentTime = 0;
                                     selectSoundRef.current.play();
                                 }}
