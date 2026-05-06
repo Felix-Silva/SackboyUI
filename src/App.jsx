@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "motion/react";
-import { Shirt, Sticker, Cog, CircleHelp, MessageCircleMore, Gamepad2, BookUser, Palette, AlarmClock} from "lucide-react";
+import { Shirt, Sticker, Cog, CircleHelp, MessageCircleMore, Gamepad2, BookUser, Paintbrush, AlarmClock} from "lucide-react";
 
 const BUTTONS = [
     Shirt, Sticker, Cog,
     CircleHelp, MessageCircleMore, Gamepad2,
-    BookUser, Palette, AlarmClock,
+    BookUser, Paintbrush, AlarmClock,
 ];
 
 export default function App() {
